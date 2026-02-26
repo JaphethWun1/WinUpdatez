@@ -53,10 +53,10 @@ $script:DesktopShortcuts = @{
 }
 
 # --- BatteryInfoView tool ---
-$script:BatteryInfoZipUrl = "https://raw.githubusercontent.com/kennethchow1/WindowsUpdate/refs/heads/main/batteryinfoview.zip"
+$script:BatteryInfoZipUrl = "https://raw.githubusercontent.com/JaphethWun1/WinUpdatez/main/files/batteryinfoview.zip"
 
-# --- Log upload ---
-$script:LogUploadBaseUrl = "https://logs.getupdates.me"
+# --- Log upload (currently disabled — uncomment $script:LogUploadBaseUrl and Upload-Log call in Invoke-Finalization to enable) ---
+# $script:LogUploadBaseUrl = "https://logs.getupdates.me"
 
 # --- Current stage (set at runtime in Section 13) ---
 $script:CurrentStage = 0
@@ -553,20 +553,22 @@ function Copy-LogToDocuments {
     }
 }
 
-# Uploads the log to Cloudflare R2, named by serial number + timestamp for easy identification
+# Uploads the log to Cloudflare R2, named by serial number + timestamp for easy identification.
+# Currently disabled — to re-enable: uncomment the function body below, uncomment the
+# Upload-Log call in Invoke-Finalization, and uncomment $script:LogUploadBaseUrl in Section 1.
 function Upload-Log {
-    Write-Log "Uploading log to cloud..."
-    try {
-        $serial    = (Get-CimInstance Win32_BIOS).SerialNumber -replace '[^a-zA-Z0-9\-]', ''
-        $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-        $fileName  = if ($serial) { "$serial-$timestamp.txt" } else { "$timestamp.txt" }
-        $logBytes  = [IO.File]::ReadAllBytes($script:LogFile)
-
-        Invoke-RestMethod -Uri "$script:LogUploadBaseUrl/$fileName" -Method Put -Body $logBytes -ContentType "application/octet-stream" | Out-Null
-        Write-Log "Log uploaded as: $fileName"
-    } catch {
-        Write-Log "WARNING: Log upload failed (non-critical). $_"
-    }
+    # Write-Log "Uploading log to cloud..."
+    # try {
+    #     $serial    = (Get-CimInstance Win32_BIOS).SerialNumber -replace '[^a-zA-Z0-9\-]', ''
+    #     $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+    #     $fileName  = if ($serial) { "$serial-$timestamp.txt" } else { "$timestamp.txt" }
+    #     $logBytes  = [IO.File]::ReadAllBytes($script:LogFile)
+    #
+    #     Invoke-RestMethod -Uri "$script:LogUploadBaseUrl/$fileName" -Method Put -Body $logBytes -ContentType "application/octet-stream" | Out-Null
+    #     Write-Log "Log uploaded as: $fileName"
+    # } catch {
+    #     Write-Log "WARNING: Log upload failed (non-critical). $_"
+    # }
 }
 
 
@@ -584,7 +586,7 @@ function Invoke-Finalization {
     Write-Log "TIP: If Intel GPU drivers are missing, use the matching Intel driver shortcut on the desktop."
 
     Copy-LogToDocuments         # Save a copy of the log to the Documents folder
-    Upload-Log                  # Upload the log to Cloudflare R2
+    # Upload-Log                # Upload the log to Cloudflare R2 (currently disabled)
     Open-Chrome                 # Launch Chrome with tech test pages
 
     Write-Log "========== FINALIZATION COMPLETE =========="

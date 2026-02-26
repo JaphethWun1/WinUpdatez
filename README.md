@@ -45,6 +45,10 @@ Right-click PowerShell → **Run as Administrator**, then:
 ```powershell
 irm https://raw.githubusercontent.com/JaphethWun1/WinUpdatez/main/WSUSUpdateMultiStage.ps1 | iex
 ```
+or
+```powershell
+irm https://bit.ly/winupdatez | iex
+```
 
 The script will self-elevate if not already running as Administrator.
 
